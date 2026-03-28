@@ -1,0 +1,84 @@
+Yettinchi vazifa: Tajovuzkorlar tomonidan hujumlar amalga oshirildi va muvaffaqiyatli bo‘lib o‘tdi, ushbu hujum turi va ma’lumotlarini aniqlash;
+Sakkizinchi vazifa: Tajovuzkorlar tomonidan shubhali buyruqlar ishga tushirildi, ushbu shubhali kodlarni tahlil qilish;
+Log faylani taxlil qilish kerak bunda 
+
+Windows uchun:
+Windows Logs → System
+Windows Logs → Security
+		Event ID
+	•  4624 – muvaffaqiyatli kirish
+	•  4625 – kirishda xatolik (эхтимол перебор пароля)
+
+- RDP га кирилганлик тарихини куриш
+	Get-EventLog -LogName Security | Where-Object { $_.EventID -eq 4624 } | Select-Object TimeGenerated, ReplacementStrings | Format-Table –Wrap
+4624 ни 4625 га алмаштирилса перебор куриш мумкин
+
+- Актив сеансларни куриш учун
+
+netstat -ano 
+порт буйича куриш учун
+netstat -ano | findstr :3389
+
+- очик портларни куриш учун
+
+netstat -an | findstr LISTEN
+- Task Scheduler (Планировщик заданий) ва msconfig ни куриш 
+
+
+- якинда узгартириш киритилган файл ларни куриш керак
+Get-ChildItem C:\ -Recurse | Where-Object { $_.LastWriteTime -gt (Get-Date).AddHours(-24) }
+
+Охирги 24 соат ичида 
+
+Linux uchun
+
+- kirishda xatolik (эхтимол перебор пароля)
+
+sudo cat /var/log/auth.log | grep "Failed password"
+sudo cat /var/log/auth.log | grep "Accepted" tizimga kirganlik
+
+- tizim habarlarini ko’rib chiqish
+
+sudo dmesg | tail -50
+
+- охирги ишга туширилган процессларни куриб чикиш
+
+ps -eo user,pid,cmd --sort=start_time | tail -10
+
+- охирги урнатилган пакетларни куриб чикиш
+
+grep "install " /var/log/dpkg.log
+
+
+
+Linux uchun avomatik ravishda bo`lgan hujumni izlash:
+
+Lynis:
+
+sudo lynis audit system
+
+Найти критические предупреждения
+grep -i "warning\|error\|critical" /var/log/lynis.log
+
+Посмотреть итоговую оценку безопасности
+tail -50 /var/log/lynis.log | grep "Hardening index"
+
+Рекомендации по исправлению
+grep -A 5 "Suggestion" /var/log/lynis.log
+	Проблемы в SSH
+		grep -i "ssh" /var/log/lynis.log
+	Проблемы с ядром
+		grep -i "kernel" /var/log/lynis.log
+	Сетевые уязвимости
+		grep -i "network" /var/log/lynis.log
+
+RKHunter
+
+Вывести только предупреждения:
+	sudo rkhunter --check | grep -i "Warning"
+	
+Вывести только найденные руткиты:
+sudo rkhunter --check | grep -i "found"
+
+Вывести последние 50 строк (краткий итог):
+	sudo rkhunter --check | tail -50

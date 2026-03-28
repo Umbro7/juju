@@ -1,0 +1,230 @@
+Показать только HTTP
+http
+
+Только TCP
+tcp
+
+Только DNS
+dns
+
+По IP
+ip.addr == 192.168.1.10
+
+По порту
+tcp.port == 80
+tcp.port == 22
+tcp.port == 3389
+
+Исходящий трафик
+ip.src == 192.168.1.10
+
+Входящий трафик
+ip.dst == 192.168.1.10
+
+
+
+2. Фильтры для поиска SQL-инъекций
+
+Ключевой принцип:
+
+Ищем подозрительные строки в HTTP
+
+http contains "SELECT"
+http contains "UNION"
+http contains "OR 1=1"
+http contains "information_schema"
+http contains "SLEEP"
+http contains "admin'"
+
+Более точечно:
+http.request.method == "POST"
+
+http.request.uri contains "login"
+
+http contains "' OR"
+http contains "--"
+http contains "#"
+
+Комбинации (очень мощно)
+http && ip.addr == 192.168.1.10
+
+http.request.method == "POST" && http contains "OR"
+
+http contains "UNION" && http contains "SELECT"
+
+3. Как палится Hydra (SSH, RDP, FTP)
+
+
+Общий паттерн:
+
+МНОГО попыток за короткое время
+
+SSH (порт 22)
+tcp.port == 22
+
+И смотри:
+
+куча SYN пакетов
+частые reconnect'ы
+одинаковый источник
+RDP (3389)
+tcp.port == 3389
+FTP (21)
+tcp.port == 21
+
+ищи:
+
+ftp contains "USER"
+ftp contains "PASS"
+
+Универсальный индикатор brute force:
+tcp.flags.syn == 1 && tcp.flags.ack == 0
+
+показывает попытки соединения
+
+4. Через Statistics (самый важный метод)
+
+(именно это у тебя в задании)
+
+
+Используй:
+
+1. Endpoints
+кто больше всего общается
+подозрительный IP сразу видно
+2. Conversations
+кто с кем общается
+можно найти атакующего
+3. Resolved Addresses
+домены
+API
+странные хосты
+4. Protocol Hierarchy
+какие протоколы используются
+если много HTTP → ищи инъекции
+если много SSH → возможно brute force
+
+5. Методика анализа (самое важное)
+Шаг 1
+Statistics → Protocol Hierarchy
+
+понять, что происходит вообще
+
+Шаг 2
+Statistics → Endpoints
+
+найти подозрительный IP
+
+Шаг 3
+ip.addr == X.X.X.X
+Шаг 4
+http
+Шаг 5
+http contains "OR"
+http contains "UNION"
+Шаг 6
+
+ПКМ → Follow → TCP Stream
+
+тут обычно сразу видно:
+
+логин
+пароль
+инъекцию
+флаг
+
+6. Профи-фильтры (когда уже шаришь)
+frame contains "password"
+
+tcp contains "admin"
+
+http.request.method == "POST" && frame contains "pass"
+
+tcp.stream eq 5
+
+
+=================
+
+Statistics --> Resolved Addresses
+Разрешенные адреса Эта опция помогает аналитикам идентифицировать IP-адреса иDNSИмена, доступные в файле захвата, можно получить, предоставив список разрешенных адресов и их имен хостов.
+
+Statistics --> Protocol Hierarchy
+Иерархия протоколов
+Эта опция отображает все доступные протоколы из файла захвата и помогает аналитикам просматривать протоколы в древовидной форме на основе счетчиков пакетов и процентов
+
+Statistic --> Conversations
+Беседы Диалог представляет собой трафик между двумя конкретными конечными точками
+
+
+Statistics --> Endpoints
+Конечные точки Опция «Конечные точки» аналогична опции «Разговоры». Единственное отличие заключается в том, что эта опция предоставляет уникальную информацию для одного поля (Ethernet, IPv4, IPv6,TCPиУДПТаким образом, аналитики могут идентифицировать уникальные конечные точки в файле захвата и использовать его для интересующего события. Для просмотра этой информации можно использовать меню
+
+Statistics --> IPvX Statistics
+IPv4 и IPv6
+До этого момента почти все варианты предоставляли информацию, содержащую обе версии IP-адресов
+
+
+Statistics --> DNS
+Этот вариант разбивает все DNS извлекает пакеты из файла захвата и помогает аналитикам просматривать результаты в древовидной форме на основе счетчиков пакетов и процентного соотношения
+
+Statistics --> HTTP
+Этот вариант разбивает всеHTTPизвлекает пакеты из файла захвата и помогает аналитикам просматривать результаты в древовидной форме на основе счетчиков пакетов и процентного соотношения
+
+
+Английский	C-подобный	Описание	Пример
+
+еq	        ==		Равный		ip.src == 10.10.10.100
+
+ne		!=		Не равны	ip.src != 10.10.10.100
+
+gt		>		Больше чем	ip.ttl > 250
+
+lt		<		Меньше, чем	ip.ttl < 10
+
+ge		>=		Больше или равноip.ttl >= 0xFA
+
+le		<=		Меньше или равноip.ttl <= 0xA
+
+
+and		&&		Логическое И	(ip.src == 10.10.10.100) AND (ip.src == 10.10.10.111)
+
+or		||		Логическое ИЛИ	(ip.src == 10.10.10.100) OR (ip.src == 10.10.10.111)
+
+not		!		Логическое НЕ	!(ip.src == 10.10.10.222)
+
+
+Фильтр	Описание
+	
+http	Показать все HTTP пакеты	
+
+dns	Показать все DNS пакеты
+
+http.response.code == 200 	Показать все пакеты с HTTP код ответа "200"	
+
+dns.flags.response == 0		Показать все DNS запросы
+
+http.request.method == "GET"	Показать все HTTP GET-запросы	
+
+dns.flags.response == 1		Показать все DNS ответы
+
+http.request.method == "POST"	Показать все HTTP POST-запросы	
+
+dns.qry.type == 1		Показать все DNS записи "А"
+
+http.server contains "Apache"	Перечислите все HTTP пакеты, в которых поле "сервер" пакета содержит "Apache" ключевое слово.
+
+http.host matches "\.(php|html)" Перечислите все  HTTP пакеты, в которых поля "host" соответствуют ключевым словам ".php" или ".html".
+
+
+editcap -b 50MB big.pcap small.pcap
+tcpdump -r big.pcap -C 50 -w split.pcap
+
+Windows
+Если установлен Wireshark:
+
+cd "C:\Program Files\Wireshark"
+editcap.exe -b 50MB C:\Users\you\big.pcap small.pcap
+Linux / Kali
+editcap -b 50MB big.pcap small.pcap
+
+apackets.com

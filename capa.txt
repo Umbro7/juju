@@ -1,0 +1,9 @@
+capa.exe .\cryptbot.bin
+
+-hили--help
+
+Показать это справочное сообщение и выйти.
+capa -h
+
+-vили--verbose	Включить подробный вывод результатов.	capa.exe .\cryptbot.bin -v
+-vvили--vverbose	Включите отображение очень подробного документа с результатами.	capa.exe .\cryptbot.bin -vv

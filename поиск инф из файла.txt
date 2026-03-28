@@ -1,0 +1,7 @@
+strings tetris.exe > strings.txt
+
+Теперь ищи:
+
+cat strings.txt | grep -i flag
+cat strings.txt | grep -i base64
+cat strings.txt | grep -i key

